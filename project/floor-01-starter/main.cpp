@@ -86,6 +86,7 @@ int main() {
             // linear/binary/recursive and this file never notices.
             const Monster* m = findMonster(bestiary, arg);
             if (m) printMonster(*m);
+            else if (arg == hero_name) std::cout << "That's you dummy.\n";
             else   std::cout << "No such creature stalks this Keep.\n";
         }
         else if (cmd == "benchmark") {
