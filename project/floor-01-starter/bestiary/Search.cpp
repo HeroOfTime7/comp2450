@@ -51,21 +51,27 @@ const Monster* binarySearch(const std::vector<Monster>& bestiary,
     return nullptr;
 }
 
-const Monster* binarySearchRecursive(const std::vector<Monster>& bestiary,
-                                     const std::string&         name) {
-    std::size_t low = 0;
-    std::size_t high = bestiary.size();
+namespace {
+    const Monster* binSearchRec(
+        const std::vector<Monster>& bestiary,
+        const std::string& name,
+        std::size_t low,
+        std::size_t high
+    ) {
+        if(low >= high) return nullptr;
 
-    while (low < high) {
-        std::size_t mid = low + (high - low) / 2;
+        std::size_t mid = low + std::floor((high - low) / 2);
         const std::string& here = bestiary[mid].name;
 
         if(here == name) return &bestiary[mid];
-        else if(here < name) low = mid + 1;
-        else high = mid;
+        else if(here < name) return binSearchRec(bestiary, name, mid + 1, high);
+        else return binSearchRec(bestiary, name, low, mid);
     }
-    
-    return nullptr;
+}
+
+const Monster* binarySearchRecursive(const std::vector<Monster>& bestiary,
+                                     const std::string&         name) {
+    return binSearchRec(bestiary, name, 0, bestiary.size());
 }
 
 const Monster* findMonster(const std::vector<Monster>& bestiary,
@@ -78,7 +84,7 @@ const Monster* findMonster(const std::vector<Monster>& bestiary,
     //   - At N=100,000, does it matter? By how much?
     //   - This is a JUDGMENT, not a fact. Whatever you pick, write WHY in
     //     your commit message. That reasoning is the graded artifact.
-    return binarySearch(bestiary, name);
+    return binarySearchRecursive(bestiary, name);
 }
 
 }
