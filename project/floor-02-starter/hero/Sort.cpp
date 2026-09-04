@@ -24,6 +24,7 @@
 
 #include "Sort.h"
 #include <algorithm>  // you will want std::sort in sortInventory
+#include <sstream>
 
 namespace dungeon {
 
@@ -109,6 +110,46 @@ namespace dungeon {
             return store;
         }
 
+        void quicksortImpl(std::vector<Item>& v,
+            std::size_t low, std::size_t high,
+            const Comparator& cmp) {
+            
+            if(low >= high) return;
+            std::size_t p = partition(v, low, high, cmp);
+            if(p > low) quicksortImpl(v, low, p - 1, cmp);
+            quicksortImpl(v, p + 1, high, cmp);
+        }
+
+        Comparator makeComparator(const std::string& key,
+            bool descending) {
+            
+            Comparator cmp;
+            if(key == "name") {
+                cmp = [](const Item& a, const Item& b) {
+                    return a.name < b.name;
+                };
+            }
+            else if(key == "weight") {
+                cmp = [](const Item& a, const Item& b) {
+                    return a.weight < b.weight;
+                };
+            }
+            else if(key == "value") {
+                cmp = [](const Item& a, const Item& b) {
+                    return a.value < b.value;
+                };
+            }
+            else return nullptr;
+
+            if(descending) {
+                Comparator asc = cmp;
+                cmp = [asc](const Item& a, const Item& b) {
+                    return asc(b, a);
+                };
+            }
+
+            return cmp;
+        }
     }
 
 
@@ -120,16 +161,22 @@ void mergeSort(std::vector<Item>& inventory, const Comparator& cmp) {
 // ---- 2. Quicksort -------------------------------------------------------
 
 void quicksort(std::vector<Item>& inventory, const Comparator& cmp) {
-
+    if(inventory.size() < 2) return;
+    quicksortImpl(inventory, 0, inventory.size() - 1, cmp);
 }
 
 // ---- 3. sortInventory (the seam) ----------------------------------------
 
 bool sortInventory(Hero& hero, const std::string& criterion) {
-    (void)criterion;
-    Comparator byWeight = [](const Item& a, const Item& b) {
-        return a.weight < b.weight;};
-    mergeSort(hero.inventory, byWeight);
+    std::istringstream in(criterion);
+    std::string key;
+    std::string dir;
+    in >> key >> dir;
+
+    bool descending = (dir == "desc");
+    Comparator cmp = makeComparator(key, descending);
+    if(!cmp) return false;
+    std::sort(hero.inventory.begin(), hero.inventory.end(), cmp);
     return true;
 }
 
