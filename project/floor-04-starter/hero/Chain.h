@@ -96,7 +96,7 @@ public:
     // (clear() does the same job — implement it below and call it from
     // the destructor body if you prefer one source of truth.)
     ~Chain() {
-        // TODO Floor 4 (Wednesday)
+        clear();
     }
 
     // -----------------------------------------------------------------
@@ -129,17 +129,15 @@ public:
     // TODO Floor 4 (Monday) — return the cached size_.
     // We cache size so size() is O(1). Walking the chain to count would
     // be O(n) on every call; the log is queried by `log <n>` constantly.
-    std::size_t size() const  { return 0; /* TODO Monday */ }
+    std::size_t size() const  { return size_; }
     bool        empty() const { return size() == 0; }
 
     // Raw head pointer. Callers walk the chain by hand:
     //     for (const Node* p = chain.head(); p; p = p->next) ...
     // The non-const overload exists for completeness; we don't use it
     // this week.
-    //
-    // TODO Floor 4 (Monday) — return head_.
-    const Node* head() const { return nullptr; /* TODO Monday */ }
-    Node*       head()       { return nullptr; /* TODO Monday */ }
+    const Node* head() const { return head_; }
+    Node*       head()       { return head_; }
 
     // -----------------------------------------------------------------
     // Mutation
@@ -147,20 +145,24 @@ public:
 
     // Prepend a new node holding `value`. O(1) — that is the whole point
     // of having a linked list at all.
-    //
-    // TODO Floor 4 (Monday). The body is three lines:
-    //     Node* n = new Node(value, head_);
-    //     head_   = n;
-    //     ++size_;
-    void push_front(const T& /*value*/) {
-        // TODO Monday
+    void push_front(const T& value) {
+        Node* n = new Node(value, head_);
+        head_ = n;
+        size_++;
     }
 
     // Walk and delete every node. Leaves the chain empty.
     //
     // TODO Floor 4 (Wednesday). Same loop as the destructor.
     void clear() {
-        // TODO Wednesday
+        Node* p = head_;
+        while(p != nullptr) {
+            Node* n = p->next;
+            delete p;
+            p = n;
+        }
+        head_ = nullptr;
+        size_ = 0;
     }
 
 private:
