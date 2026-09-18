@@ -32,41 +32,56 @@
 #include "hero/Bench.h"
 #include "hero/Hero.h"
 #include "hero/Sort.h"
+#include "battle/Battle.h"
 
 using namespace dungeon;
 
-namespace {
+namespace
+{
 
-void splitFirst(const std::string& line, std::string& cmd, std::string& rest) {
-    auto sp = line.find(' ');
-    if (sp == std::string::npos) { cmd = line; rest.clear(); }
-    else { cmd = line.substr(0, sp); rest = line.substr(sp + 1); }
-}
+    void splitFirst(const std::string &line, std::string &cmd, std::string &rest)
+    {
+        auto sp = line.find(' ');
+        if (sp == std::string::npos)
+        {
+            cmd = line;
+            rest.clear();
+        }
+        else
+        {
+            cmd = line.substr(0, sp);
+            rest = line.substr(sp + 1);
+        }
+    }
 
-void printHelp() {
-    std::cout << "(commands:\n"
-              << "   search <name>                 — look up by name in bestiary or inventory\n"
-              << "   list                          — list the bestiary\n"
-              << "   inventory                     — list your inventory\n"
-              << "   inspect <n>                   — show the nth item in your inventory\n"
-              << "   sort inventory by <key> [asc|desc]\n"
-              << "                                 — key is name, weight, or value\n"
-              << "   benchmark [N]                 — race the search algorithms\n"
-              << "   benchmark sort [N] [--sorted] [--bad-pivot]\n"
-              << "                                 — race the sorting algorithms\n"
-              << "   help                          — this screen\n"
-              << "   quit                          — leave the dungeon)\n";
-}
+    void printHelp()
+    {
+        std::cout << "(commands:\n"
+                  << "   search <name>                 — look up by name in bestiary or inventory\n"
+                  << "   list                          — list the bestiary\n"
+                  << "   inventory                     — list your inventory\n"
+                  << "   inspect <n>                   — show the nth item in your inventory\n"
+                  << "   sort inventory by <key> [asc|desc]\n"
+                  << "   battle warden                 — face the Warden of the Foundations\n"
+                  << "                                 — key is name, weight, or value\n"
+                  << "   benchmark [N]                 — race the search algorithms\n"
+                  << "   benchmark sort [N] [--sorted] [--bad-pivot]\n"
+                  << "                                 — race the sorting algorithms\n"
+                  << "   help                          — this screen\n"
+                  << "   quit                          — leave the dungeon)\n";
+    }
 
-}  // anonymous namespace
+} // anonymous namespace
 
-int main() {
+int main()
+{
     std::cout << "\n=== THE FORGEMASTER'S VAULT ===\n\n";
 
     std::cout << "What is your name, adventurer? ";
     Hero hero;
     std::getline(std::cin, hero.heroName);
-    if (hero.heroName.empty()) hero.heroName = "Nameless One";
+    if (hero.heroName.empty())
+        hero.heroName = "Nameless One";
 
     std::cout << "\nWelcome back, " << hero.heroName << ".\n"
               << "Empty molds line the walls. The Forgemaster watches, silent.\n"
@@ -74,7 +89,8 @@ int main() {
 
     // Floor 1 state — the bestiary, sorted (so binarySearch's precondition holds).
     auto bestiary = loadBestiary("data/monsters.txt");
-    if (bestiary.empty()) {
+    if (bestiary.empty())
+    {
         std::cerr << "The Bestiary tablet is blank. Cannot proceed.\n";
         return 1;
     }
@@ -82,7 +98,8 @@ int main() {
 
     // Floor 2 state — the hero's inventory, intentionally unsorted.
     hero.inventory = loadInventory("data/starter-inventory.txt");
-    if (hero.inventory.empty()) {
+    if (hero.inventory.empty())
+    {
         std::cerr << "Your satchel is empty. Cannot proceed.\n";
         return 1;
     }
@@ -102,56 +119,70 @@ int main() {
     // with no catch (watch what the runtime prints to stderr), then add
     // the catch and try again. That A/B IS the exceptions lesson.
     std::string line;
-    while (true) {
+    while (true)
+    {
         std::cout << "> ";
-        if (!std::getline(std::cin, line)) break;
-        if (line.empty()) continue;
-        try {
+        if (!std::getline(std::cin, line))
+            break;
+        if (line.empty())
+            continue;
+        try
+        {
 
             std::string cmd, rest;
             splitFirst(line, cmd, rest);
 
-            if (cmd == "quit" || cmd == "exit") {
+            if (cmd == "quit" || cmd == "exit")
+            {
                 std::cout << "The forge cools. The molds stand empty again.\n";
                 break;
             }
-            else if (cmd == "help") {
+            else if (cmd == "help")
+            {
                 printHelp();
             }
-            else if (cmd == "list") {
-                for (const auto& m : bestiary) printMonster(m);
+            else if (cmd == "list")
+            {
+                for (const auto &m : bestiary)
+                    printMonster(m);
             }
-            else if (cmd == "search") {
+            else if (cmd == "search")
+            {
                 // Floor 3 (Mon): this is where your function template earns
                 // its keep. Replace the monster-only findMonster call below
                 // with calls to findByName<T> against BOTH the bestiary and
                 // hero.inventory — same source template, two instantiations.
                 // Print the first match; fall through to the "no such" line
                 // if nothing matches in either.
-                if (rest.empty()) {
+                if (rest.empty())
+                {
                     std::cout << "Speak a name:  search <monster-or-item>\n";
                     continue;
                 }
                 // TODO Floor 3 (Mon): wire this to findByName<T>. For now
                 // it still calls Floor 1's monster-only findMonster.
-                const Monster* m = findByName(bestiary, rest);
-                if(m) {
+                const Monster *m = findByName(bestiary, rest);
+                if (m)
+                {
                     printMonster(*m);
                     continue;
                 }
-                const Item* it = findByName(hero.inventory, rest);
-                if(it) {
-                    std::cout << " " << it->name 
-                    << "(wt " << it->weight 
-                    << ", val " << it ->value << ")\n";
+                const Item *it = findByName(hero.inventory, rest);
+                if (it)
+                {
+                    std::cout << " " << it->name
+                              << "(wt " << it->weight
+                              << ", val " << it->value << ")\n";
                     continue;
                 }
                 std::cout << "There is nothing by that name." << std::endl;
             }
-            else if (cmd == "inventory") {
+            else if (cmd == "inventory")
+            {
                 printInventory(hero);
             }
-            else if (cmd == "inspect") {
+            else if (cmd == "inspect")
+            {
                 // Floor 3 (Fri): this command exists to stress-test your
                 // exception story. RIGHT NOW, if the user asks for an index
                 // that isn't there, the marked line below is undefined
@@ -159,83 +190,134 @@ int main() {
                 // by accident. On Friday you change `[` to `.at(` and that
                 // line will THROW a BagException, which the try/catch you
                 // added around the loop will catch.
-                if (rest.empty()) {
+                if (rest.empty())
+                {
                     std::cout << "Usage: inspect <n>\n";
                     continue;
                 }
                 std::size_t n;
-                try { n = std::stoull(rest); }
-                catch (...) {
+                try
+                {
+                    n = std::stoull(rest);
+                }
+                catch (...)
+                {
                     std::cout << "Usage: inspect <n>\n";
                     continue;
                 }
-                if (n == 0) {
+                if (n == 0)
+                {
                     std::cout << "Items are numbered from 1, adventurer.\n";
                     continue;
                 }
                 // Users type 1-based indices; internally we are 0-based.
-                const Item& it = hero.inventory.at(n - 1);
+                const Item &it = hero.inventory.at(n - 1);
                 std::cout << "  " << it.name
-                        << "  (wt " << it.weight
-                        << ", val " << it.value << ")\n";
+                          << "  (wt " << it.weight
+                          << ", val " << it.value << ")\n";
             }
-            else if (cmd == "sort") {
+            else if (cmd == "sort")
+            {
                 // Parsing logic unchanged from Floor 2; see comments there.
                 std::istringstream in(rest);
                 std::string what, by, key, dir;
                 in >> what >> by >> key >> dir;
-                if (what != "inventory" || by != "by" || key.empty()) {
+                if (what != "inventory" || by != "by" || key.empty())
+                {
                     std::cout << "Usage: sort inventory by <name|weight|value> [asc|desc]\n";
                     continue;
                 }
                 std::string criterion = key;
-                if (!dir.empty()) criterion += " " + dir;
-                if (!sortInventory(hero, criterion)) {
+                if (!dir.empty())
+                    criterion += " " + dir;
+                if (!sortInventory(hero, criterion))
+                {
                     std::cout << "Unknown sort key. Try: name, weight, or value.\n";
                     continue;
                 }
                 printInventory(hero);
             }
-            else if (cmd == "benchmark") {
+            else if (cmd == "benchmark")
+            {
                 std::istringstream in(rest);
                 std::string first;
                 in >> first;
-                if (first == "sort") {
+                if (first == "sort")
+                {
                     SortBenchOptions opts;
                     std::size_t n = 0;
                     std::string tok;
-                    while (in >> tok) {
-                        if      (tok == "--sorted")    opts.presorted = true;
-                        else if (tok == "--bad-pivot") opts.badPivot  = true;
-                        else {
-                            try { n = std::stoull(tok); }
-                            catch (...) {
+                    while (in >> tok)
+                    {
+                        if (tok == "--sorted")
+                            opts.presorted = true;
+                        else if (tok == "--bad-pivot")
+                            opts.badPivot = true;
+                        else
+                        {
+                            try
+                            {
+                                n = std::stoull(tok);
+                            }
+                            catch (...)
+                            {
                                 std::cout << "Usage: benchmark sort [N] [--sorted] [--bad-pivot]\n";
                                 n = static_cast<std::size_t>(-1);
                                 break;
                             }
                         }
                     }
-                    if (n == static_cast<std::size_t>(-1)) continue;
-                    if (n == 0) runSortBenchmarkSweep(opts);
-                    else        runSortBenchmark(n, opts);
+                    if (n == static_cast<std::size_t>(-1))
+                        continue;
+                    if (n == 0)
+                        runSortBenchmarkSweep(opts);
+                    else
+                        runSortBenchmark(n, opts);
                 }
-                else if (first.empty()) {
+                else if (first.empty())
+                {
                     runBenchmarkSweep();
                 }
-                else {
-                    try {
+                else
+                {
+                    try
+                    {
                         runBenchmark(std::stoull(first));
-                    } catch (const std::exception&) {
+                    }
+                    catch (const std::exception &)
+                    {
                         std::cout << "Usage: benchmark [N]   or   benchmark sort [N] [flags]\n";
                     }
                 }
             }
-            else {
+            else if (cmd == "battle")
+            {
+                if (rest != "warden")
+                {
+                    std::cout << "Usage: battle warden\n";
+                    continue;
+                }
+                BattleOutcome outcome = runWardenBattle(hero);
+                switch (outcome)
+                {
+                case BattleOutcome::Victory:
+                    std::cout << "\nThe Warden falls. The gate opens.\n";
+                    break;
+                case BattleOutcome::Defeat:
+                    std::cout << "\nYou fall. The gate stays shut.\n";
+                    break;
+                case BattleOutcome::Fled:
+                    std::cout << "\nYou step back from the gate. It does not chase.\n";
+                    break;
+                }
+            }
+            else
+            {
                 std::cout << "The Vault does not understand '" << cmd << "'.\n";
             }
         }
-        catch(const std::exception& e) {
+        catch (const std::exception &e)
+        {
             std::cout << "No such item. (" << e.what() << ")\n";
         }
     }
