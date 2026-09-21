@@ -8,7 +8,7 @@ This file is the grader's map of your battle code. Help us find each piece. Be s
 
 ## AI declaration for Trial III
 
-(One or two sentences. *Which* tool, *what* you asked it for, *what* you did with the result. "Did not use" is fine — but the line must be there.)
+Did not use
 
 ---
 
@@ -16,8 +16,8 @@ This file is the grader's map of your battle code. Help us find each piece. Be s
 
 These are the functions Friday's quiz can ask me to modify on paper. I wrote each of these by hand, with no autocomplete on the body. Pick functions you know cold — three of the four quiz questions pull from these.
 
-1. `<function-name>` in `<file>:<approximate line range>`
-2. `<function-name>` in `<file>:<approximate line range>`
+1. `<useBattleMenu>` in `<Battle.cpp>:<135>`
+2. `<wardenFights>` in `<Battle.cpp>:<95>`
 
 ---
 
