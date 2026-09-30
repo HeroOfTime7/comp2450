@@ -38,9 +38,30 @@ You will learn three things this week, and they sit on top of each other:
 </figure>
 
 <figure class="diagram">
-  <img src="{{ '/assets/diagrams/iterator-categories.svg' | relative_url }}" alt="A five-rung ladder. From bottom to top: Input (read once, advance); Output (write once, advance); Forward (multi-pass, advance only); Bidirectional (advance and retreat); Random-access (jump by integer in O(1)). Beside the ladder, a column lists which standard algorithms unlock at each rung: std::find at Input/Forward; std::reverse at Bidirectional; std::sort at Random-access."/>
+  <img src="{{ '/assets/diagrams/iterator-categories.svg' | relative_url }}" alt="A four-rung ladder. From bottom to top: Input (single-pass, read-only); Forward (multi-pass, advance only); Bidirectional (advance and retreat); Random-access (jump by integer in O(1)). Beside the ladder, a column lists which standard algorithms unlock at each rung: std::find at Input/Forward; std::reverse at Bidirectional; std::sort at Random-access."/>
   <figcaption>Iterator categories — each rung adds an operation. <code>Chain&lt;T&gt;::iterator</code> reaches the Forward rung (or Bidirectional, with <code>prev</code>). <code>Bag&lt;T&gt;::iterator</code> reaches Random-access. <code>std::find</code> needs almost nothing; <code>std::sort</code> needs the top rung.</figcaption>
 </figure>
+
+<div class="callout lore" markdown="1">
+<p class="callout-title">The fifth category — the lens that writes</p>
+
+The ladder above is about *reading*: each rung up adds a way to **move**. The fifth category, the **output iterator**, stands beside the ladder rather than on it, because it adds a way to **write**. It promises two things only: `*out = value` stores a value, and `++out` moves to the next slot. You may not read through it, and you may not go back.
+
+The standard library hands you two ready-made ones in `<iterator>`:
+
+```cpp
+// a lens that writes to the screen
+std::copy(hero.eventLog.begin(), hero.eventLog.end(),
+          std::ostream_iterator<std::string>(std::cout, "\n"));
+
+// a lens that appends to a vector — and the honest way to sort a chain
+std::vector<std::string> sorted;
+std::copy(hero.eventLog.begin(), hero.eventLog.end(), std::back_inserter(sorted));
+std::sort(sorted.begin(), sorted.end());   // fine: a vector's iterator is random-access
+```
+
+`std::copy` takes two lenses to read with and one to write with, and knows nothing about what is behind any of them. Your own `Chain<T>::iterator` can stand on the writing side too: `*it` returns `T&`, so `*it = value` works. `const_iterator` cannot, because `*it` returns `const T&` — and that refusal is the reason it exists.
+</div>
 
 `Chain<T>` already has `begin()`-shaped behavior under another name — `head()` is an iterator-like handle. This week you wrap it in a real iterator type and finally retire the hand-walking.
 
@@ -54,7 +75,7 @@ By the end of Floor 5 you will be able to:
 - Read the *single* templated `printLog(first, last, ...)` the starter ships — it replaced Floor 4½'s `printLog`/`printLogOldest` pair — and explain how one function walks a chain forward (`begin`/`end`) and backward (`rbegin`/`rend`) without knowing the container.
 - Use `std::find` and `std::find_if` against `Chain<std::string>`, `Bag<Item>`, and `Bag<Monster>` from one source line each.
 - Read a `std::sort` template error against a forward iterator and name the missing operation it asked for.
-- State the five iterator categories in order and identify which one your container's iterator belongs to.
+- Name the five iterator categories — the four rungs of the ladder in order, plus the output iterator beside it — and identify which ones your container's iterator belongs to.
 
 ## Pre-class
 
