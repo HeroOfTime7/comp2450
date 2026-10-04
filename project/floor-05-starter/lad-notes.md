@@ -56,10 +56,10 @@ This happens because the end is pointing at the beginning, and end must point at
 Looks like it needs an policy to see how to sort.
 
 ## 5
-for (const auto& s : hero.eventLog) std::cout << s << "\n";
-for (Chain<std::string>::const_iterator it = hero.eventLog.cbegin(); it != hero.eventLog.cend(); ++it) {
-  std::cout << *it << "\n";
-}
+> for (const auto& s : hero.eventLog) std::cout << s << "\n";
+> for (Chain<std::string>::const_iterator it = hero.eventLog.cbegin(); it != hero.eventLog.cend(); ++it) {
+    std::cout << *it << "\n";
+  }
 If would much rather write the first loop. It is much much shorter. I also don't have to change the container when using auto because it detects the change on its own.
 
 ## 6
