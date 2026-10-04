@@ -229,8 +229,8 @@ public:
     // TODO Floor 5 (Wednesday) — same shape, but const_iterator.
     // The cbegin / cend overloads give callers a way to ASK for a
     // const_iterator from a non-const Chain (useful for templated code).
-    const_iterator begin()  const { return const_iterator(); return const_iterator(head_, this); }
-    const_iterator end()    const { return const_iterator(); return const_iterator(nullptr, this); }
+    const_iterator begin()  const { return const_iterator(head_, this); }
+    const_iterator end()    const { return const_iterator(nullptr, this); }
     const_iterator cbegin() const { return begin(); }
     const_iterator cend()   const { return end(); }
 
